@@ -1,4 +1,4 @@
 [verbose][showmiss]
-(eval(input()),eval(input()),-1,0,0,1)
+(int(input()),eval("copysign(0.5,%d)+%d"%((int(input()),)*2)),-1,0,0,1)
 (0,0,0) if y==0 else
-(sgn(y)/math.sqrt(2),-sgn(y)/math.sqrt(2),-1)
+(copysign(1,y)/sqrt(2),-copysign(1,y)/sqrt(2),-1)

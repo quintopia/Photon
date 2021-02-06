@@ -2,10 +2,131 @@ import sys
 import numpy as np
 import math
 import random
+import ast
 
-#utility function to make programs easier to write
-def sgn(x):
-    return x and x/abs(x)
+    
+SAFE_FX = {
+    'exp': math.exp,
+    'input': input,
+    'int': int,
+    'float': float,
+    'round': round,
+    'sqrt': math.sqrt,
+    'floor': math.floor,
+    'ceil': math.ceil,
+    'abs': abs,
+    'all': all,
+    'any': any,
+    'bool': bool,
+    'complex': complex,
+    'divmod': divmod,
+    'max': max,
+    'min': min,
+    'pow': pow,
+    'ord': ord,
+    'sum': sum,
+    'tuple': tuple,
+    'copysign': math.copysign,
+    'fabs': math.fabs,
+    'factorial': math.factorial,
+    'fmod': math.fmod,
+    'frexp': math.frexp,
+    'ldexp': math.ldexp,
+    'trunc': math.trunc,
+    'log': math.log,
+    'acos': math.acos,
+    'atan': math.atan,
+    'asin': math.asin,
+    'sin': math.sin,
+    'cos': math.cos,
+    'tan': math.tan,
+    'atan2': math.atan2,
+    'hypot': math.hypot,
+    'degrees': math.degrees,
+    'radians': math.radians,
+    'acosh': math.acosh,
+    'asinh': math.asinh,
+    'atanh': math.atanh,
+    'cosh': math.cosh,
+    'sinh': math.sinh,
+    'tanh': math.tanh,
+}
+
+SAFE_NODES = set(
+    (ast.Expression,
+    ast.Num,
+    ast.Str,
+    ast.Call,
+    ast.Name,
+    ast.Load,
+    ast.BinOp,
+    ast.Add,
+    ast.Sub,
+    ast.Mult,
+    ast.Div,
+    ast.FloorDiv,
+    ast.Mod,
+    ast.Pow,
+    ast.LShift,
+    ast.RShift,
+    ast.BitOr,
+    ast.BitXor,
+    ast.BitAnd,
+    ast.keyword,
+    ast.Tuple,
+    ast.UnaryOp,
+    ast.USub,
+    ast.Lambda,
+    ast.arguments,
+    ast.arg,
+    ast.IfExp,
+    ast.Compare,
+    ast.Eq,
+    ast.BoolOp,
+    ast.And,
+    ast.Or,
+    ast.GtE,
+    ast.Not,
+    ast.LtE,
+    ast.Lt,
+    ast.Gt,
+    ast.Invert,
+    )
+)
+
+class CleansingNodeVisitor(ast.NodeVisitor):
+    
+    def __init__(self,nodelist,fxlist):
+        self.nodelist = nodelist
+        self.fxlist = fxlist
+        
+    def generic_visit(self, node):
+        if type(node) not in self.nodelist:
+            raise Exception("%s not in SAFE_NODES" % type(node))
+        super(CleansingNodeVisitor, self).generic_visit(node)
+
+    def visit_Call(self, call):
+        try:
+            if call.func.id not in self.fxlist:
+                raise Exception("Unknown function: %s" % call.func.id)
+        except AttributeError:
+            print(call)
+
+def safe_eval(s):
+    tree = ast.parse(s, mode='eval')
+    cnv = CleansingNodeVisitor(SAFE_NODES,SAFE_FX)
+    cnv.visit(tree)
+    compiled = compile(tree, s, "eval")
+    return(eval(compiled, SAFE_FX))
+    
+def recursive_eval(s):
+    safe_fx = SAFE_FX
+    safe_fx['eval'] = safe_eval
+    tree = ast.parse(s, mode='eval')
+    cnv = CleansingNodeVisitor(SAFE_NODES,safe_fx)
+    cnv.visit(tree)
+    compiled = compile(tree, s, "eval")
+    return(eval(compiled, safe_fx))
 
 class Photon:
 
@@ -40,14 +161,13 @@ class Photon:
                 self.showmiss = True
             self.verbose = True
             parts.pop(0)
-        x,y,z,vx,vy,vz = eval(parts[0])
+        start = parts[0]
+        x,y,z,vx,vy,vz = recursive_eval(start)
         self.start=np.array([x,y,z])
         self.grad=np.array([vx,vy,vz])
         self.center=np.array([round(x) for x in self.start])
         expr="lambda x,y,z:"+"".join(parts[1:])
-        if "for" in expr:
-            raise SyntaxError("Generator expressions are BANNED",(filename,2,expr.index("for"),expr+"\n"))
-        self.fx = eval(expr)
+        self.fx = recursive_eval(expr)
         self.t = 0
     
     def curpoint(self):

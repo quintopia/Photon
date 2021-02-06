@@ -1,6 +1,6 @@
 [verbose]
-(eval(input()),eval(input()),-1,0,0,1)
-((x*y-x)/math.sqrt((x*y-x)**2+(0.5*sgn(y)-y)**2+1),(0.5*sgn(y)-y)/math.sqrt((x*y-x)**2+(0.5*sgn(y)-y)**2+1),-1+1/math.sqrt((x*y-x)**2+(0.5*sgn(y)-y)**2+1)) if z==0 and x*y>=0 else
-((x*y-x)/math.sqrt((x*y-x)**2+(0.5*sgn(y)-y)**2+1),(0.5*sgn(y)-y)/math.sqrt((x*y-x)**2+(0.5*sgn(y)-y)**2+1),-1-1/math.sqrt((x*y-x)**2+(0.5*sgn(y)-y)**2+1)) if z==2 and x*y<0 else
+(int(input()),int(input()),-1,0,0,1)
+((x*y-x)/sqrt((x*y-x)**2+(copysign(0.5,y)-y)**2+1),(copysign(0.5,y)-y)/sqrt((x*y-x)**2+(copysign(0.5,y)-y)**2+1),-1+1/sqrt((x*y-x)**2+(copysign(0.5,y)-y)**2+1)) if z==0 and x*y>=0 else
+((x*y-x)/sqrt((x*y-x)**2+(copysign(0.5,y)-y)**2+1),(copysign(0.5,y)-y)/sqrt((x*y-x)**2+(copysign(0.5,y)-y)**2+1),-1-1/sqrt((x*y-x)**2+(copysign(0.5,y)-y)**2+1)) if z==2 and x*y<0 else
 (0,0,0) if y==0 and z==1 else
 (0,-y,0)
